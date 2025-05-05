@@ -174,6 +174,26 @@ To reset back to normal operation:
 ./reset-failover.ps1
 ```
 
+## Cleaning Up Resources
+
+When you're done with the demo, you can clean up all AWS resources using the cleanup script:
+
+```powershell
+cd AwsGlobalSqs.Infrastructure/Scripts
+./cleanup.ps1
+```
+
+This will delete all CloudFormation stacks created by the deployment script, including:
+- Route53 DNS records
+- SQS queues in both regions
+- IAM roles and policies
+
+You can also override the default values:
+
+```powershell
+./cleanup.ps1 -PrimaryRegion "us-east-1" -SecondaryRegion "us-west-2" -ApplicationName "your-app-name"
+```
+
 ## Business Impact
 
 Implementing global availability for SQS can have significant business benefits:
@@ -234,9 +254,3 @@ This project was an experiment into seeing what Amazon Q can do in terms of crea
 > How Amazon Q helped build this solution from scratch
 > 
 > The iterative problem-solving process
-> 
-> How we addressed various challenges along the way
-> 
-> The evolution of the project from concept to implementation
-> 
-> The markdown format makes it easy to read and includes all the key interactions that led to the final solution. This will be helpful for judges to understand how Amazon Q was utilized throughout the development process.
