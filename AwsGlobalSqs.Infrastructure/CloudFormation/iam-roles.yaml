@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template for creating IAM roles for SQS access'
+
+Parameters:
+  ApplicationName:
+    Type: String
+    Default: global-sqs-demo
+    Description: Name of the application
+
+Resources:
+  SQSAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ApplicationName}-sqs-access-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSQSFullAccess
+      Path: /
+
+  Route53AccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ApplicationName}-route53-access-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonRoute53FullAccess
+      Path: /
+
+  SQSAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${ApplicationName}-sqs-access-policy"
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:*
+            Resource: '*'
+      Roles:
+        - !Ref SQSAccessRole
+
+  Route53AccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${ApplicationName}-route53-access-policy"
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - route53:*
+            Resource: '*'
+      Roles:
+        - !Ref Route53AccessRole
+
+Outputs:
+  SQSAccessRoleARN:
+    Description: ARN of the SQS access role
+    Value: !GetAtt SQSAccessRole.Arn
+  Route53AccessRoleARN:
+    Description: ARN of the Route53 access role
+    Value: !GetAtt Route53AccessRole.Arn

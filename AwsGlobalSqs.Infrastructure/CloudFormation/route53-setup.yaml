@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template for setting up Route53 for global SQS'
+
+Parameters:
+  HostedZoneId:
+    Type: String
+    Description: The ID of the hosted zone where the DNS record will be created
+  
+  DomainName:
+    Type: String
+    Default: sqs-global.example.com
+    Description: The domain name for the global SQS endpoint
+  
+  PrimaryRegion:
+    Type: String
+    Default: us-east-1
+    Description: The primary AWS region for SQS
+  
+  SecondaryRegion:
+    Type: String
+    Default: us-west-2
+    Description: The secondary AWS region for SQS
+  
+  PrimaryWeight:
+    Type: Number
+    Default: 90
+    Description: The weight for the primary region (0-100)
+  
+  SecondaryWeight:
+    Type: Number
+    Default: 10
+    Description: The weight for the secondary region (0-100)
+
+Resources:
+  GlobalSQSDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: CNAME
+      TTL: 60
+      ResourceRecords:
+        - !Sub "sqs.${PrimaryRegion}.amazonaws.com"
+      SetIdentifier: "Primary"
+      Weight: !Ref PrimaryWeight
+      HealthCheckId: !Ref PrimaryHealthCheck
+
+  SecondaryGlobalSQSDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: CNAME
+      TTL: 60
+      ResourceRecords:
+        - !Sub "sqs.${SecondaryRegion}.amazonaws.com"
+      SetIdentifier: "Secondary"
+      Weight: !Ref SecondaryWeight
+      HealthCheckId: !Ref SecondaryHealthCheck
+
+  PrimaryHealthCheck:
+    Type: AWS::Route53::HealthCheck
+    Properties:
+      HealthCheckConfig:
+        Port: 443
+        Type: HTTPS
+        ResourcePath: "/"
+        FullyQualifiedDomainName: !Sub "sqs.${PrimaryRegion}.amazonaws.com"
+        RequestInterval: 30
+        FailureThreshold: 3
+      HealthCheckTags:
+        - Key: Name
+          Value: !Sub "SQS-${PrimaryRegion}-HealthCheck"
+
+  SecondaryHealthCheck:
+    Type: AWS::Route53::HealthCheck
+    Properties:
+      HealthCheckConfig:
+        Port: 443
+        Type: HTTPS
+        ResourcePath: "/"
+        FullyQualifiedDomainName: !Sub "sqs.${SecondaryRegion}.amazonaws.com"
+        RequestInterval: 30
+        FailureThreshold: 3
+      HealthCheckTags:
+        - Key: Name
+          Value: !Sub "SQS-${SecondaryRegion}-HealthCheck"
+
+Outputs:
+  GlobalSQSEndpoint:
+    Description: The global SQS endpoint
+    Value: !Ref DomainName
+  PrimaryRegionEndpoint:
+    Description: The primary region SQS endpoint
+    Value: !Sub "sqs.${PrimaryRegion}.amazonaws.com"
+  SecondaryRegionEndpoint:
+    Description: The secondary region SQS endpoint
+    Value: !Sub "sqs.${SecondaryRegion}.amazonaws.com"

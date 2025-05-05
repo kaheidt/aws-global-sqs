@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template for creating SQS queues in multiple regions'
+
+Parameters:
+  QueueName:
+    Type: String
+    Default: global-sqs-demo-queue
+    Description: Name of the SQS queue
+
+Resources:
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref QueueName
+      VisibilityTimeout: 30
+      MessageRetentionPeriod: 345600 # 4 days
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 5
+
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${QueueName}-dlq"
+      MessageRetentionPeriod: 1209600 # 14 days
+
+  SQSQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref SQSQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action:
+              - sqs:SendMessage
+              - sqs:ReceiveMessage
+              - sqs:DeleteMessage
+              - sqs:GetQueueAttributes
+            Resource: !GetAtt SQSQueue.Arn
+
+Outputs:
+  QueueURL:
+    Description: URL of the SQS Queue
+    Value: !Ref SQSQueue
+  QueueARN:
+    Description: ARN of the SQS Queue
+    Value: !GetAtt SQSQueue.Arn
+  DeadLetterQueueURL:
+    Description: URL of the Dead Letter Queue
+    Value: !Ref DeadLetterQueue
+  DeadLetterQueueARN:
+    Description: ARN of the Dead Letter Queue
+    Value: !GetAtt DeadLetterQueue.Arn
