@@ -18,5 +18,7 @@ if (Test-Path -Path ".\.env") {
     Write-Host "No .env file found. Using existing environment variables."
 }
 
-# Run the consumer application
-dotnet run --project .\AwsGlobalSqs.Consumer\AwsGlobalSqs.Consumer.csproj
+# Run the consumer application from its directory to ensure appsettings.json is found
+Set-Location -Path .\AwsGlobalSqs.Consumer
+dotnet run
+Set-Location -Path ..

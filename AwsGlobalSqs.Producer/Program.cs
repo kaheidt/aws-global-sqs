@@ -33,13 +33,11 @@ namespace AwsGlobalSqs.Producer
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    // Configure AWS SQS client with SigV4a signing
+                    // Configure AWS SQS client for multi-region support
                     services.AddAWSService<IAmazonSQS>(new AWSOptions
                     {
-                        // Use SigV4a for multi-region support
-                        SignatureVersion = "4a",
-                        // No specific region is set here since we're using SigV4a for multi-region
                         // The actual endpoint will be determined by Route53
+                        Region = RegionEndpoint.USEast1 // Default region, will be overridden by Route53
                     });
 
                     // Configure AWS Route53 client

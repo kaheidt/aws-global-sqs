@@ -64,7 +64,22 @@ namespace AwsGlobalSqs.Consumer.Services
                 
                 foreach (var message in messages)
                 {
-                    _logger.LogInformation($"Received message in {region}: {message}");
+                    // Set console color based on region
+                    ConsoleColor originalColor = Console.ForegroundColor;
+                    if (region.Contains("east", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                    }
+
+                    // Log the message with color
+                    Console.WriteLine($"Received message in {region}: {message}");
+                    
+                    // Reset console color
+                    Console.ForegroundColor = originalColor;
                     
                     // Update the destination region since we now know where it was delivered
                     message.DestinationRegion = region;

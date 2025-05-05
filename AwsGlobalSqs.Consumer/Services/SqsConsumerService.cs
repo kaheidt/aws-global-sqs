@@ -65,7 +65,7 @@ namespace AwsGlobalSqs.Consumer.Services
                 };
 
                 var response = await _sqsClient.SendMessageAsync(request);
-                _logger.LogInformation($"Message sent to SQS. MessageId: {response.MessageId}");
+                _logger.LogDebug($"Message sent to SQS. MessageId: {response.MessageId}");
                 
                 return response.MessageId;
             }
@@ -92,13 +92,16 @@ namespace AwsGlobalSqs.Consumer.Services
                 var response = await _sqsClient.ReceiveMessageAsync(request);
                 
                 var messages = new List<SqsMessage>();
-                foreach (var message in response.Messages)
+                foreach (var message in response.Messages ?? new List<Message>())
                 {
                     try
                     {
                         var sqsMessage = JsonSerializer.Deserialize<SqsMessage>(message.Body);
-                        sqsMessage.ReceiptHandle = message.ReceiptHandle;
-                        messages.Add(sqsMessage);
+                        if (sqsMessage != null)
+                        {
+                            sqsMessage.ReceiptHandle = message.ReceiptHandle;
+                            messages.Add(sqsMessage);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -126,7 +129,7 @@ namespace AwsGlobalSqs.Consumer.Services
                 };
 
                 await _sqsClient.DeleteMessageAsync(request);
-                _logger.LogInformation($"Message deleted from SQS. ReceiptHandle: {receiptHandle}");
+                _logger.LogDebug($"Message deleted from SQS. ReceiptHandle: {receiptHandle}");
             }
             catch (Exception ex)
             {

@@ -1,13 +1,13 @@
 # AWS Global SQS with SigV4a and Route53 Failover
 
-This project demonstrates how to create a .NET application that sends messages to Amazon SQS using SigV4a authentication, allowing it to be agnostic about which regional SQS endpoint the message is being sent to. The routing is controlled via Amazon Route53 weighted routing rules.
+This project demonstrates how to create a .NET application that sends messages to Amazon SQS using multi-region capabilities, allowing it to be agnostic about which regional SQS endpoint the message is being sent to. The routing is controlled via Amazon Route53 weighted routing rules.
 
 ## Architecture
 
 ```mermaid
 graph TB
     subgraph "Producer Application"
-        A[Message Producer] --> B[SigV4a Client]
+        A[Message Producer] --> B[SQS Client]
     end
     
     B -->|"Send to sqs-global.example.com"| C[Route53 DNS]
@@ -30,7 +30,7 @@ graph TB
 
 The solution consists of the following components:
 
-1. **Producer Application**: Sends messages to SQS using SigV4a authentication, which allows it to be region-agnostic.
+1. **Producer Application**: Sends messages to SQS using a region-agnostic approach.
 2. **Consumer Application**: Monitors SQS queues in both us-east-1 and us-west-2 regions to show message arrival.
 3. **Route53 Configuration**: Weighted routing rules that direct traffic to either us-east-1 (primary) or us-west-2 (failover).
 4. **SQS Queues**: Identical queues in both regions that can receive and process messages.
@@ -145,22 +145,23 @@ To reset back to normal operation:
 
 ## Key Features
 
-1. **SigV4a Authentication**: Allows the producer to sign requests that can be validated by any AWS region.
+1. **Multi-Region Support**: The producer can send messages to any AWS region.
 2. **Route53 Weighted Routing**: Controls which regional SQS endpoint receives the messages.
 3. **Region-Agnostic Producer**: The producer is unaware of which region the message is being sent to.
 4. **Multi-Region Monitoring**: The consumer monitors queues in both regions to demonstrate message routing.
 
 ## Implementation Details
 
-### SigV4a Authentication
+### Multi-Region Support
 
-The producer uses SigV4a authentication, which is a multi-region capable version of AWS Signature Version 4. This allows the producer to sign requests that can be validated by any AWS region, making it region-agnostic.
+The producer is configured to work with multiple regions:
 
 ```csharp
-// Configure AWS SQS client with SigV4a signing
+// Configure AWS SQS client for multi-region support
 services.AddAWSService<IAmazonSQS>(new AWSOptions
 {
-    SignatureVersion = "4a"
+    // The actual endpoint will be determined by Route53
+    Region = RegionEndpoint.USEast1 // Default region, will be overridden by Route53
 });
 ```
 
