@@ -207,3 +207,36 @@ This project could be extended in several ways:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+
+## Putting Amazon Q to Work
+This project was an experiment into seeing what Amazon Q can do in terms of creating something "impossible" that doesn't exist currently. If you want to read the full conversation, read it [here](conversation.md).
+> I've created a comprehensive markdown file named conversation.md in the root of your repository that captures our entire conversation. This file documents the journey of building this global SQS solution with Amazon Q, including:
+> 
+> The initial request and project setup
+> 
+> Creating the solution structure and implementing the code
+> 
+> Adding the Mermaid diagram to the README
+> 
+> Implementing environment variable support
+> 
+> Fixing various PowerShell script issues
+> 
+> Resolving the appsettings.json file location issue
+> 
+> Adding color-coded console output
+> 
+> Enhancing the README for the Amazon Q contest submission
+> 
+> This conversation history serves as valuable documentation that shows:
+> 
+> How Amazon Q helped build this solution from scratch
+> 
+> The iterative problem-solving process
+> 
+> How we addressed various challenges along the way
+> 
+> The evolution of the project from concept to implementation
+> 
+> The markdown format makes it easy to read and includes all the key interactions that led to the final solution. This will be helpful for judges to understand how Amazon Q was utilized throughout the development process.
